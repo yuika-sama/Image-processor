@@ -1,7 +1,7 @@
 Requierement:
-pillow
-tkinter
-opencv-python
+-pillow
+-tkinter
+-opencv-python
 
 How to run?
 - Clone this repo
