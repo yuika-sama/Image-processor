@@ -1,14 +1,18 @@
-import tkinter as tk
+import os
 from tkinter import *
 from tkinter import filedialog
-from PIL import Image, ImageTk, ImageFilter, ImageEnhance
+import cv2
+import numpy as np
+from PIL import Image, ImageTk
 from process import ImageProcessor
-from tkinter.filedialog import askopenfilename
-import os
+from camera_viewer import CameraViewer
+
 class AppGUI:
     def __init__(self, master):
         self.master = master
         self.image_processor = ImageProcessor()
+
+        self.video_stream = cv2.VideoCapture(0)
 
         self.setup_gui()
 
@@ -18,7 +22,7 @@ class AppGUI:
         self.master.title("Image Processor")
 
         self.panel = Label(self.master)
-        self.panel.grid(row=0, column=0, rowspan=12, padx=50, pady=50)
+        self.panel.grid(row=0, column=0, rowspan=12, padx=50, pady=60)
 
         self.image_processor.load_image('assets/logo.jpg')
         self.display_image(self.image_processor.img)
@@ -81,7 +85,7 @@ class AppGUI:
         self.rotate_btn.place(x = 1300, y = 110)
 
         self.flip_btn = Button(self.master, text='Flip', width=25,
-                                 command=self.flip, bg="#dddddd")
+                                 command=self.open_flip_window, bg="#dddddd")
         self.flip_btn.configure(font=('consolas', 10, 'bold'), foreground='black')
         self.flip_btn.place(x=1300, y=145)
 
@@ -110,19 +114,33 @@ class AppGUI:
         self.edge_btn.configure(font=('consolas', 10, 'bold'), foreground='black')
         self.edge_btn.place(x=1300, y=320)
 
+        self.camera_btn = Button(self.master, text = 'Camera', width = 20,
+                                     command = self.camera_window_open, bg = "#dddddd")
+        self.camera_btn.configure(font=('consolas', 10, 'bold'), foreground='black')
+        self.camera_btn.place(x = 50, y = 680)
+
 
         self.load_image_button = Button(self.master, text="Load Image",
                                         command=self.load_image)
-        self.load_image_button.place(x=50, y=15)
+        self.load_image_button.place(x=50, y=25)
 
         self.entry_box = Entry(self.master, font=('consolas', 10, 'normal'), width=75)
-        self.entry_box.place(x = 130, y = 17)
+        self.entry_box.place(x = 130, y = 27)
+
+        self.save_btn = Button(self.master, text='Save', width=20,
+                                 command=self.save_image, bg="#dddddd")
+        self.save_btn.configure(font=('consolas', 10, 'bold'), foreground='black')
+        self.save_btn.place(x=210, y=680)
 
     def display_image(self, img):
         display_image = ImageTk.PhotoImage(img)
         self.panel.configure(image=display_image)
         self.panel.image = display_image
 
+    def save_image(self):
+        filename = filedialog.asksaveasfilename(defaultextension=".jpg", filetypes=[("JPEG files", "*.jpg")])
+        if filename:
+            self.image_processor.save_image(filename)
     def load_image(self):
         filename = filedialog.askopenfilename(initialdir=os.getcwd(), title="Select Image",
                                               filetypes=(("JPEG files", "*.jpg"), ("All files", "*.*")))
@@ -182,11 +200,29 @@ class AppGUI:
             self.image_processor.rotate()
             self.display_image(self.image_processor.output_image)
 
-    def flip(self):
+    def open_flip_window(self):
+        flip_window = Toplevel(self.master)
+        flip_window.title("Camera")
+
+        horizontal_flip_btn = Button(flip_window, text = "Horizontal Flip",
+                                     command = self.flip_horizontal,
+                                     width = 20, bg = "#dddddd")
+        horizontal_flip_btn.pack(pady = 10)
+
+        vertical_flip_btn = Button(flip_window, text="Vertical Flip",
+                                     command=self.flip_vertical,
+                                     width=20, bg="#dddddd")
+        vertical_flip_btn.pack(pady=10)
+
+    def flip_horizontal(self):
         if self.image_processor.img:
-            self.image_processor.flip()
+            self.image_processor.flip_horizontal()
             self.display_image(self.image_processor.output_image)
 
+    def flip_vertical(self):
+        if self.image_processora.img:
+            self.image_processor.flip_vertical()
+            self.display_image(self.image_processor.output_image)
     def blur(self):
         if self.image_processor.img:
             self.image_processor.blur()
@@ -211,3 +247,15 @@ class AppGUI:
         if self.image_processor.img:
             self.image_processor.edge()
             self.display_image(self.image_processor.output_image)
+
+    def camera_window_open(self):
+        camera_window = Toplevel(self.master)
+        camera_window.title("Camera")
+
+        self.camera_viewer = CameraViewer(camera_window, self)
+
+
+    def show_captured_image(self, image_path):
+        self.image_processor.load_image('captures/captured_image.jpg')
+        self.display_image(self.image_processor.img)
+        self.entry_box.insert(END, image_path)

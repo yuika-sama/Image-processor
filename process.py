@@ -9,6 +9,9 @@ class ImageProcessor:
         self.img = None
         self.output_image = None
 
+    def save_image(self, filename):
+        if self.output_image:
+            self.output_image.save(filename)
     def load_image(self, filename):
         self.img = Image.open(filename)
         w, h = self.img.size
@@ -65,8 +68,12 @@ class ImageProcessor:
         self.img = self.img.rotate(90)
         self.output_image = self.img
 
-    def flip(self):
+    def flip_horizontal(self):
         self.img = self.img.transpose(Image.FLIP_LEFT_RIGHT)
+        self.output_image = self.img
+
+    def flip_vertical(self):
+        self.img = self.img.transpose(Image.FLIP_TOP_BOTTOM)
         self.output_image = self.img
 
     def blur(self):
