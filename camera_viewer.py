@@ -1,11 +1,13 @@
-import tkinter as tk
-from tkinter import *
-from PIL import Image, ImageTk
-import cv2
 import os
+from tkinter import *
+
+import cv2
+from PIL import Image, ImageTk
+
 
 class CameraViewer:
     def __init__(self, master, app):
+        self.captured_image_path = None
         self.master = master
         self.app = app
         self.master.geometry("1300x600")
@@ -17,10 +19,10 @@ class CameraViewer:
         self.panel.pack(padx=10, pady=10, side=LEFT)
 
         self.captured_image_label = Label(self.master)
-        self.captured_image_label.pack(padx=10, pady=10, side = RIGHT)
+        self.captured_image_label.pack(padx=10, pady=10, side=RIGHT)
 
         self.capture_button = Button(self.master, text="Capture", command=self.capture_image)
-        self.capture_button.place(x = 675, y = 20)
+        self.capture_button.place(x=675, y=20)
 
         self.confirm_button = Button(self.master, text="Confirm", command=self.confirm_image)
         self.confirm_button.pack_forget()  # Initially hidden
@@ -56,7 +58,7 @@ class CameraViewer:
             self.captured_image_label.config(image=imgtk)
             self.captured_image_label.image = imgtk
             # Enable the confirm button
-            self.confirm_button.place(x = 605, y =20)
+            self.confirm_button.place(x=605, y=20)
 
     def confirm_image(self):
         self.save_and_close_window()
