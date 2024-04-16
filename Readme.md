@@ -1,7 +1,4 @@
-Requierement:
-+pillow
-+tkinter
-+opencv-python
+Requierement: pillow, tkinter, opencv-python
 
 Quick start!!
 - Clone this repo
