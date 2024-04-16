@@ -95,20 +95,22 @@ class ImageProcessor:
         self.output_image = self.img
 
     def resize_width(self, position):
-        position = float(position)
-        w, h = self.img.size
-        output_img = self.img.resize((int(w*position/100), h))
-        self.output_image = output_img
+        width, height = self.img.size
+        resized_image = self.img.resize((position, height), Image.LANCZOS)
+        self.output_image = resized_image
     def resize_height(self, position):
-        position = float(position)
-        w, h = self.img.size
-        output_img = self.img.resize((w, int(h*position/100)))
-        self.output_image = output_img
+        width, height = self.img.size
+        resized_image = self.img.resize((width, position), Image.LANCZOS)
+        self.output_image = resized_image
 
-    def crop(self):
-        self.img = self.img.crop((100, 100, 400, 400))
-        self.output_image = self.img
+    def crop(self, x1, y1, x2, y2):
+        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+        crop_img = self.img.crop((x1, y1, x2, y2))
+        self.output_image = crop_img
 
-    def edge(self):
-        self.img = self.img.filter(ImageFilter.FIND_EDGES)
-        self.output_image = self.img
+    def find_edge(self):
+        find_edge_img = self.img.filter(ImageFilter.FIND_EDGES)
+        self.output_image = find_edge_img
+    def contour(self):
+        contour_img = self.img.filter(ImageFilter.CONTOUR)
+        self.output_image = contour_img

@@ -1,5 +1,4 @@
 import os
-import tkinter as tk
 from tkinter import *
 from tkinter import filedialog
 
@@ -54,18 +53,18 @@ class AppGUI:
         self.crop_btn = None
         self.crop_window = None
         self.crop_window_status = 0
+        self.top_left_x = None
+        self.top_left_y = None
+        self.bottom_right_x = None
+        self.bottom_right_y = None
 
-        self.emboss_btn = None
-        self.emboss_window = None
-        self.emboss_window_status = 0
-
-        self.rotate_btn = None
-        self.rotate_window = None
-        self.resize_window_status = 0
+        self.find_edge_btn = None
+        self.find_edge_window = None
+        self.find_edge_window_status = 0
 
         self.save_btn = None
 
-        self.brightness = 1
+        self.default_image = None
 
         self.master = master
         self.image_processor = ImageProcessor()
@@ -85,6 +84,7 @@ class AppGUI:
         self.image_processor.load_image('assets/logo.jpg')
         self.display_image(self.image_processor.img)
         self.image = self.image_processor.img
+        self.default_image = self.image
 
         self.brightness_slider = Scale(self.master, label="Brightness", from_=0, to=2,
                                        orient=HORIZONTAL, length=200, resolution=0.1,
@@ -162,14 +162,19 @@ class AppGUI:
         self.resize_btn.place(x=1300, y=250)
 
         self.crop_btn = Button(self.master, text='Crop', width=25,
-                               command=self.resize, bg="#dddddd")
+                               command=self.crop, bg="#dddddd")
         self.crop_btn.configure(font=('consolas', 10, 'bold'), foreground='black')
         self.crop_btn.place(x=1300, y=285)
 
         self.edge_btn = Button(self.master, text='Edge Enhance', width=25,
-                               command=self.resize, bg="#dddddd")
+                               command=self.edge, bg="#dddddd")
         self.edge_btn.configure(font=('consolas', 10, 'bold'), foreground='black')
         self.edge_btn.place(x=1300, y=320)
+
+        self.reset = Button(self.master, text='Reset', width=25,
+                               command=self.reset, bg="#dddddd")
+        self.reset.configure(font=('consolas', 10, 'bold'), foreground='black')
+        self.reset.place(x=1300, y=355)
 
         self.camera_btn = Button(self.master, text='Camera', width=20,
                                  command=self.camera_window_open, bg="#dddddd")
@@ -209,6 +214,7 @@ class AppGUI:
             self.green_slider.set(255)
             self.blue_slider.set(255)
             self.image = self.image_processor.img
+            self.default_image = self.image
             self.display_image(self.image)
 
     def process_brightness(self, position):
@@ -261,9 +267,11 @@ class AppGUI:
     def flip_closing(self):
         self.flip_window_status = 0
         self.flip_window.destroy()
+
     def open_flip_window(self):
         self.flip_window_status += 1
         self.init_flip_window()
+
     def init_flip_window(self):
         if self.flip_window_status == 1:
             self.flip_window = Toplevel(self.master)
@@ -281,12 +289,14 @@ class AppGUI:
                                        command=self.flip_vertical,
                                        width=20, bg="#dddddd")
             vertical_flip_btn.pack(pady=10)
+
     def flip_horizontal(self):
         if self.image_processor.img:
             self.image_processor.img = self.image
             self.image_processor.flip_horizontal()
             self.image = self.image_processor.output_image
             self.display_image(self.image)
+
     def flip_vertical(self):
         if self.image_processor.img:
             self.image_processor.img = self.image
@@ -294,14 +304,16 @@ class AppGUI:
             self.image = self.image_processor.output_image
             self.display_image(self.image)
 
-    def blur(self): #call blur
+    def blur(self):  # call blur
         self.blur_window_status += 1
         self.init_blur_window()
+
     def blur_closing(self):
         self.blur_window_status = 0
         self.blur_window.destroy()
+
     def init_blur_window(self):
-        if (self.blur_window_status == 1):
+        if self.blur_window_status == 1:
             self.blur_window = Toplevel(self.master)
             self.blur_window.title("Blur")
             self.blur_window.resizable(False, False)
@@ -309,87 +321,198 @@ class AppGUI:
             self.blur_window.geometry("200x225")
 
             convolution_blur_btn = Button(self.blur_window, text="Simple Blur",
-                                         command=self.convolution,
-                                         width=20, bg="#dddddd")
-            convolution_blur_btn.pack(pady = 10)
+                                          command=self.convolution,
+                                          width=20, bg="#dddddd")
+            convolution_blur_btn.pack(pady=10)
 
             box_blur_slider = Scale(self.blur_window, label="Box Blur", from_=0, to=10,
-                                  orient=HORIZONTAL, length=200, resolution=1,
-                                  command=self.box_blur, bg="#dddddd")
+                                    orient=HORIZONTAL, length=200, resolution=1,
+                                    command=self.box_blur, bg="#dddddd")
             box_blur_slider.set(0)
-            box_blur_slider.pack(pady = 10)
+            box_blur_slider.pack(pady=10)
 
             gaussian_blur_slider = Scale(self.blur_window, label="Gaussian Blur", from_=0, to=10,
-                                  orient=HORIZONTAL, length=200, resolution=1,
-                                  command=self.gaussian_blur, bg="#dddddd")
+                                         orient=HORIZONTAL, length=200, resolution=1,
+                                         command=self.gaussian_blur, bg="#dddddd")
             gaussian_blur_slider.set(0)
-            gaussian_blur_slider.pack(pady = 10)
+            gaussian_blur_slider.pack(pady=10)
+
     def convolution(self):
         if self.image_processor.img:
             self.image_processor.blur()
             self.display_image(self.image_processor.output_image)
+
     def box_blur(self, position):
         if self.image_processor.img:
             self.image_processor.box_blur(position)
             self.display_image(self.image_processor.output_image)
+
     def gaussian_blur(self, position):
         if self.image_processor.img:
             self.image_processor.gaussian_blur(position)
             self.display_image(self.image_processor.output_image)
+
     def emboss(self):
         if self.image_processor.img:
             self.image_processor.emboss()
             self.display_image(self.image_processor.output_image)
 
     def resize(self):
-        self.resize_window_status+=1
+        self.resize_window_status += 1
         self.init_resize_window()
+
     def resize_closing(self):
         self.resize_window_status = 0
         self.resize_window.destroy()
+
     def init_resize_window(self):
-        if (self.resize_window_status == 1):
+        if self.resize_window_status == 1:
             self.resize_window = Toplevel(self.master)
             self.resize_window.title("Resize")
             self.resize_window.resizable(False, False)
             self.resize_window.protocol("WM_DELETE_WINDOW", self.resize_closing)
-            self.resize_window.geometry("200x175")
+            self.resize_window.geometry("250x175")
 
-            width_slider = Scale(self.resize_window, label="Width", from_=0, to=100,
-                                orient=HORIZONTAL, length=200, resolution=1,
-                                command=self.width_process, bg="#dddddd")
-            width_slider.set(100)
-            width_slider.pack(pady = 10)
+            default_width, default_height = self.image.size
+            self.width_scale = Scale(self.resize_window, label="Width", from_=0,
+                                     to=default_width, orient=HORIZONTAL,
+                                     command=self.update_width)
+            self.height_scale = Scale(self.resize_window, label="Height", from_=0,
+                                      to=default_height, orient=HORIZONTAL,
+                                      command=self.update_height)
 
-            height_slider = Scale(self.resize_window, label="Height", from_=0, to=100,
-                                 orient=HORIZONTAL, length=200, resolution=1,
-                                 command=self.height_process, bg="#dddddd")
-            height_slider.set(100)
-            height_slider.pack(pady=10)
-    def width_process(self, position):
+            self.width_scale.set(default_width)
+            self.width_scale.pack(pady=10)
+
+            self.height_scale.set(default_height)
+            self.height_scale.pack(pady=10)
+
+    def update_width(self, position):
+        position = int(position)
+        self.image_processor.img = self.image
         self.image_processor.resize_width(position)
+        self.image = self.image_processor.output_image
         self.display_image(self.image_processor.output_image)
-    def height_process(self, position):
+
+    def update_height(self, position):
+        position = int(position)
+        self.image_processor.img = self.image
         self.image_processor.resize_height(position)
+        self.image = self.image_processor.output_image
         self.display_image(self.image_processor.output_image)
 
     def crop(self):
-        if self.image_processor.img:
-            self.image_processor.crop()
-            self.display_image(self.image_processor.output_image)
+        self.crop_window_status += 1
+        self.init_crop_window()
+
+    def crop_closing(self):
+        self.crop_window_status = 0
+        self.crop_window.destroy()
+
+    def init_crop_window(self):
+        if self.crop_window_status == 1:
+            self.crop_window = Toplevel(self.master)
+            self.crop_window.title("Crop")
+            self.crop_window.resizable(False, False)
+            self.crop_window.protocol("WM_DELETE_WINDOW", self.crop_closing)
+            self.crop_window.geometry("200x300")
+
+            default_width, default_height = self.image.size
+            self.top_left_x = Scale(self.crop_window, from_=0,
+                                    to=default_width, orient=HORIZONTAL,
+                                    command=self.update_crop)
+            self.top_left_y = Scale(self.crop_window, from_=0,
+                                    to=default_height, orient=HORIZONTAL,
+                                    command=self.update_crop)
+            self.bottom_right_x = Scale(self.crop_window, from_=0,
+                                        to=default_width, orient=HORIZONTAL,
+                                        command=self.update_crop)
+            self.bottom_right_y = Scale(self.crop_window, from_=0,
+                                        to=default_height, orient=HORIZONTAL,
+                                        command=self.update_crop)
+            self.top_left_x.set(0)
+            self.top_left_x.pack(pady=10)
+            self.top_left_y.set(0)
+            self.top_left_y.pack(pady=10)
+            self.bottom_right_x.set(default_width)
+            self.bottom_right_x.pack(pady=10)
+            self.bottom_right_y.set(default_height)
+            self.bottom_right_y.pack(pady=10)
+
+    def update_crop(self, _=None):
+        top_left_x = self.top_left_x.get()
+        top_left_y = self.top_left_y.get()
+        bottom_right_x = self.bottom_right_x.get()
+        bottom_right_y = self.bottom_right_y.get()
+        self.image_processor.img = self.image
+        self.image_processor.crop(top_left_x, top_left_y, bottom_right_x, bottom_right_y)
+        self.display_image(self.image_processor.output_image)
 
     def edge(self):
-        if self.image_processor.img:
-            self.image_processor.edge()
-            self.display_image(self.image_processor.output_image)
+        self.find_edge_window_status += 1
+        self.init_find_edge_window()
+    def edge_closing(self):
+        self.find_edge_window_status = 0
+        self.find_edge_window.destroy()
+    def init_find_edge_window(self):
+        if self.find_edge_window_status == 1:
+            self.find_edge_window = Toplevel(self.master)
+            self.find_edge_window.title("Find Edge")
+            self.find_edge_window.resizable(False, False)
+            self.find_edge_window.protocol("WM_DELETE_WINDOW", self.edge_closing)
+            self.find_edge_window.geometry("200x200")
+
+            find_edge_btn = Button(self.find_edge_window, text="Black Background",
+                                   command=self.find_edge,
+                                   width=20, bg="#dddddd")
+            find_edge_btn.pack(pady=10)
+            contour_btn = Button(self.find_edge_window, text="White Background",
+                                 command=self.contour,
+                                 width=20, bg="#dddddd")
+            contour_btn.pack(pady=10)
+
+    def find_edge(self):
+        self.image_processor.img = self.image
+        self.image_processor.find_edge()
+        self.display_image(self.image_processor.output_image)
+
+    def contour(self):
+        self.image_processor.img = self.image
+        self.image_processor.contour()
+        self.display_image(self.image_processor.output_image)
 
     def camera_window_open(self):
         camera_window = Toplevel(self.master)
         camera_window.title("Camera")
-
         self.camera_viewer = CameraViewer(camera_window, self)
 
     def show_captured_image(self, image_path):
         self.image_processor.load_image('captures/captured_image.jpg')
         self.display_image(self.image_processor.img)
+        self.image = self.image_processor.img
         self.entry_box.insert(END, image_path)
+
+    def reset(self):
+        self.image = self.default_image
+        self.brightness_slider.set(1)
+        self.contrast_slider.set(1)
+        self.sharpness_slider.set(1)
+        self.vibrance_slider.set(1)
+        self.red_slider.set(255)
+        self.green_slider.set(255)
+        self.blue_slider.set(255)
+
+        def_width, def_height = self.default_image.size
+        if (self.resize_window_status == 1):
+            self.width_scale.set(def_width)
+            self.height_scale.set(def_height)
+            self.resize_window_status = 0
+        if (self.crop_window_status == 1):
+            self.top_left_x.set(0)
+            self.top_left_y.set(0)
+            self.bottom_right_x.set(def_width)
+            self.bottom_right_y.set(def_height)
+            self.crop_window_status = 0
+        self.flip_window_status = 0
+        self.blur_window_status = 0
+        self.find_edge_window_status = 0
