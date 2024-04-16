@@ -1,9 +1,9 @@
 Requierement:
--pillow
--tkinter
--opencv-python
++pillow
++tkinter
++opencv-python
 
-How to run?
+Quick start!!
 - Clone this repo
 - Install all requiered libraries
 - Run "main.py" file
