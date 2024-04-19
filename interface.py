@@ -565,7 +565,7 @@ class AppGUI:
             title_label.pack(pady = 10)
 
             about_text = (
-                "Chúng mình là nhóm 13 lớp 02\n"
+                "Chúng tôi là nhóm 13 lớp 02 XLTTDPT PTIT\n"
                 "Image Processor là sản phẩm của nhóm chúng tôi\n"
                 "nhằm phục vụ cho bài tập lớp bộ môn Xử lý & truyền thông \nĐa phương tiện\n"
                 "\n"
