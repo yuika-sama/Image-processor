@@ -62,9 +62,14 @@ class AppGUI:
         self.find_edge_window = None
         self.find_edge_window_status = 0
 
+        self.about_btn = None
+        self.about_window = None
+        self.about_window_status = 0
+
         self.save_btn = None
 
         self.default_image = None
+        self.image_stack = list()
 
         self.master = master
         self.image_processor = ImageProcessor()
@@ -85,6 +90,7 @@ class AppGUI:
         self.display_image(self.image_processor.img)
         self.image = self.image_processor.img
         self.default_image = self.image
+        self.image_stack.append(self.default_image)
 
         self.brightness_slider = Scale(self.master, label="Brightness", from_=0, to=2,
                                        orient=HORIZONTAL, length=200, resolution=0.1,
@@ -114,7 +120,6 @@ class AppGUI:
         self.vibrance_slider.configure(font=('consolas', 10, 'bold'), foreground='black')
         self.vibrance_slider.place(x=1070, y=240)
 
-        # self.get_channel()
         self.red_slider = Scale(self.master, label="Red", from_=0, to=255,
                                 orient=HORIZONTAL, length=200, resolution=1,
                                 command=self.process_red, bg="#dddddd")
@@ -171,10 +176,10 @@ class AppGUI:
         self.edge_btn.configure(font=('consolas', 10, 'bold'), foreground='black')
         self.edge_btn.place(x=1300, y=320)
 
-        self.reset = Button(self.master, text='Reset', width=25,
+        self.reset_btn = Button(self.master, text='Reset', width=25,
                                command=self.reset, bg="#dddddd")
-        self.reset.configure(font=('consolas', 10, 'bold'), foreground='black')
-        self.reset.place(x=1300, y=355)
+        self.reset_btn.configure(font=('consolas', 10, 'bold'), foreground='black')
+        self.reset_btn.place(x=1300, y=355)
 
         self.camera_btn = Button(self.master, text='Camera', width=20,
                                  command=self.camera_window_open, bg="#dddddd")
@@ -193,6 +198,11 @@ class AppGUI:
         self.save_btn.configure(font=('consolas', 10, 'bold'), foreground='black')
         self.save_btn.place(x=210, y=680)
 
+        self.about_btn = Button(self.master, text = 'About Us', width = 20,
+                                command = self.about_us, bg = "#dddddd")
+        self.about_btn.configure(font = ('consolas', 10, 'bold'), foreground = 'black')
+        self.about_btn.place(x = 1325, y = 680)
+
     def display_image(self, img):
         display_image = ImageTk.PhotoImage(img)
         self.panel.configure(image=display_image)
@@ -209,60 +219,59 @@ class AppGUI:
         if filename:
             self.entry_box.insert(END, filename)
             self.image_processor.load_image(filename)
-            self.get_channel()
-            self.red_slider.set(255)
-            self.green_slider.set(255)
-            self.blue_slider.set(255)
-            self.image = self.image_processor.img
-            self.default_image = self.image
-            self.display_image(self.image)
+            self.reset()
+            self.display_image(self.default_image)
+            self.image_stack.append(self.default_image)
 
     def process_brightness(self, position):
+        # self.image_processor.img = self.get_top()
         self.image_processor.enhance_brightness(position)
-        self.display_image(self.image_processor.output_image)
+        self.image_stack.append(self.image_processor.output_image)
+        self.display_image(self.get_top())
 
     def process_contrast(self, position):
+        # self.image_processor.img = self.get_top()
         self.image_processor.enhance_contrast(position)
-        self.display_image(self.image_processor.output_image)
+        self.image_stack.append(self.image_processor.output_image)
+        self.display_image(self.get_top())
 
     def process_sharpness(self, position):
         if self.image_processor.img:
             self.image_processor.enhance_sharpness(position)
-            self.display_image(self.image_processor.output_image)
+            self.image_stack.append(self.image_processor.output_image)
+            self.display_image(self.get_top())
 
     def process_vibrance(self, position):
         if self.image_processor.img:
             self.image_processor.enhance_vibrance(position)
-            self.display_image(self.image_processor.output_image)
-
-    def get_channel(self):
-        if self.image_processor.img:
-            red, green, blue = self.image_processor.extract_color()
-            self.red = sum(red) // len(red)
-            self.green = sum(green) // len(green)
-            self.blue = sum(blue) // len(blue)
+            self.image_stack.append(self.image_processor.output_image)
+            self.display_image(self.get_top())
 
     def process_red(self, position):
         if self.image_processor.img:
             self.image_processor.enhance_red(position)
-            self.display_image(self.image_processor.output_image)
+            self.image_stack.append(self.image_processor.output_image)
+            self.display_image(self.get_top())
 
     def process_green(self, position):
         if self.image_processor.img:
             self.image_processor.enhance_green(position)
-            self.display_image(self.image_processor.output_image)
+            self.image_stack.append(self.image_processor.output_image)
+            self.display_image(self.get_top())
 
     def process_blue(self, position):
         if self.image_processor.img:
             self.image_processor.enhance_blue(position)
-            self.display_image(self.image_processor.output_image)
+            self.image_stack.append(self.image_processor.output_image)
+            self.display_image(self.get_top())
 
     def rotate(self):
         if self.image_processor.img:
             self.image_processor.img = self.image
             self.image_processor.rotate()
             self.image = self.image_processor.output_image
-            self.display_image(self.image)
+            self.image_stack.append(self.image_processor.output_image)
+            self.display_image(self.get_top())
 
     def flip_closing(self):
         self.flip_window_status = 0
@@ -295,14 +304,16 @@ class AppGUI:
             self.image_processor.img = self.image
             self.image_processor.flip_horizontal()
             self.image = self.image_processor.output_image
-            self.display_image(self.image)
+            self.image_stack.append(self.image_processor.output_image)
+            self.display_image(self.get_top())
 
     def flip_vertical(self):
         if self.image_processor.img:
             self.image_processor.img = self.image
             self.image_processor.flip_vertical()
             self.image = self.image_processor.output_image
-            self.display_image(self.image)
+            self.image_stack.append(self.image_processor.output_image)
+            self.display_image(self.get_top())
 
     def blur(self):  # call blur
         self.blur_window_status += 1
@@ -340,22 +351,26 @@ class AppGUI:
     def convolution(self):
         if self.image_processor.img:
             self.image_processor.blur()
-            self.display_image(self.image_processor.output_image)
+            self.image_stack.append(self.image_processor.output_image)
+            self.display_image(self.get_top())
 
     def box_blur(self, position):
         if self.image_processor.img:
             self.image_processor.box_blur(position)
-            self.display_image(self.image_processor.output_image)
+            self.image_stack.append(self.image_processor.output_image)
+            self.display_image(self.get_top())
 
     def gaussian_blur(self, position):
         if self.image_processor.img:
             self.image_processor.gaussian_blur(position)
-            self.display_image(self.image_processor.output_image)
+            self.image_stack.append(self.image_processor.output_image)
+            self.display_image(self.get_top())
 
     def emboss(self):
         if self.image_processor.img:
             self.image_processor.emboss()
-            self.display_image(self.image_processor.output_image)
+            self.image_stack.append(self.image_processor.output_image)
+            self.display_image(self.get_top())
 
     def resize(self):
         self.resize_window_status += 1
@@ -392,14 +407,16 @@ class AppGUI:
         self.image_processor.img = self.image
         self.image_processor.resize_width(position)
         self.image = self.image_processor.output_image
-        self.display_image(self.image_processor.output_image)
+        self.image_stack.append(self.image_processor.output_image)
+        self.display_image(self.get_top())
 
     def update_height(self, position):
         position = int(position)
         self.image_processor.img = self.image
         self.image_processor.resize_height(position)
         self.image = self.image_processor.output_image
-        self.display_image(self.image_processor.output_image)
+        self.image_stack.append(self.image_processor.output_image)
+        self.display_image(self.get_top())
 
     def crop(self):
         self.crop_window_status += 1
@@ -446,7 +463,8 @@ class AppGUI:
         bottom_right_y = self.bottom_right_y.get()
         self.image_processor.img = self.image
         self.image_processor.crop(top_left_x, top_left_y, bottom_right_x, bottom_right_y)
-        self.display_image(self.image_processor.output_image)
+        self.image_stack.append(self.image_processor.output_image)
+        self.display_image(self.get_top())
 
     def edge(self):
         self.find_edge_window_status += 1
@@ -474,12 +492,14 @@ class AppGUI:
     def find_edge(self):
         self.image_processor.img = self.image
         self.image_processor.find_edge()
-        self.display_image(self.image_processor.output_image)
+        self.image_stack.append(self.image_processor.output_image)
+        self.display_image(self.get_top())
 
     def contour(self):
         self.image_processor.img = self.image
         self.image_processor.contour()
-        self.display_image(self.image_processor.output_image)
+        self.image_stack.append(self.image_processor.output_image)
+        self.display_image(self.get_top())
 
     def camera_window_open(self):
         camera_window = Toplevel(self.master)
@@ -487,13 +507,15 @@ class AppGUI:
         self.camera_viewer = CameraViewer(camera_window, self)
 
     def show_captured_image(self, image_path):
+        self.reset()
         self.image_processor.load_image('captures/captured_image.jpg')
         self.display_image(self.image_processor.img)
         self.image = self.image_processor.img
+        self.default_image = self.image
+        self.image_stack.append(self.default_image)
         self.entry_box.insert(END, image_path)
 
     def reset(self):
-        self.image = self.default_image
         self.brightness_slider.set(1)
         self.contrast_slider.set(1)
         self.sharpness_slider.set(1)
@@ -516,3 +538,49 @@ class AppGUI:
         self.flip_window_status = 0
         self.blur_window_status = 0
         self.find_edge_window_status = 0
+        self.image_stack = list()
+        self.image_stack.append(self.default_image)
+        self.image = self.default_image
+        self.display_image(self.image_processor.img)
+
+    def get_top(self):
+        return self.image_stack[len(self.image_stack) - 1]
+
+    def about_us(self):
+        self.about_window_status += 1
+        self.init_about_us_window()
+    def about_closing(self):
+        self.about_window_status = 0
+        self.about_window.destroy()
+    def init_about_us_window(self):
+        if self.about_window_status == 1:
+            self.about_window = Toplevel(self.master)
+            self.about_window.title("About Us")
+            self.about_window.resizable(False, False)
+            self.about_window.protocol("WM_DELETE_WINDOW", self.about_closing)
+            self.about_window.geometry("500x400")
+
+            title_label = Label(self.about_window, text = "About Us",
+                                font = ('consolas', 20, 'bold'))
+            title_label.pack(pady = 10)
+
+            about_text = (
+                "Chúng mình là nhóm 13 lớp 02\n"
+                "Image Processor là sản phẩm của nhóm chúng tôi\n"
+                "nhằm phục vụ cho bài tập lớp bộ môn Xử lý & truyền thông \nĐa phương tiện\n"
+                "\n"
+                "Nhóm 13:\n"
+                "Nguyễn Đức Anh - B22DCPT009\n"
+                "Bùi Hoàng Hải Đăng - B18DCPT057\n"
+                "Nguyễn Lâm Vĩ - B20DCPT226\n"
+                "Văn Thiên Phúc - B22DCPT237\n"
+                "\n"
+                "Giảng viên hướng dẫn: thầy Vũ Hữu Tiến\n"
+                "\n"
+                "Sản phẩm không mang mục đích thương mại\n"
+            )
+            about_label = Label(self.about_window, text = about_text,
+                                font = ('conoslas', 12), justify='left')
+            about_label.pack(padx = 20, pady = 10, anchor = 'w')
+
+

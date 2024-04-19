@@ -57,7 +57,6 @@ class ImageProcessor:
         g = g.point(lambda i: i * (position / 255))
         out = Image.merge('RGB', (r, g, b))
         self.output_image = out
-
     def enhance_blue(self, position):
         position = float(position)
         r, g, b = self.img.split()
@@ -66,20 +65,20 @@ class ImageProcessor:
         self.output_image = out
 
     def rotate(self):
-        self.img = self.img.rotate(90)
-        self.output_image = self.img
+        rotate_img = self.img.rotate(90)
+        self.output_image = rotate_img
 
     def flip_horizontal(self):
-        self.img = self.img.transpose(Image.FLIP_LEFT_RIGHT)
-        self.output_image = self.img
+        flip_img = self.img.transpose(Image.FLIP_LEFT_RIGHT)
+        self.output_image = flip_img
 
     def flip_vertical(self):
-        self.img = self.img.transpose(Image.FLIP_TOP_BOTTOM)
-        self.output_image = self.img
+        flip_img = self.img.transpose(Image.FLIP_TOP_BOTTOM)
+        self.output_image = flip_img
 
     def blur(self):
-        self.img = self.img.filter(ImageFilter.BLUR)
-        self.output_image = self.img
+        blur_img = self.img.filter(ImageFilter.BLUR)
+        self.output_image = blur_img
     def box_blur(self, position):
         position = float(position)
         blured = self.img.filter(ImageFilter.BoxBlur(position))
@@ -91,8 +90,8 @@ class ImageProcessor:
         self.output_image = blured
 
     def emboss(self):
-        self.img = self.img.filter(ImageFilter.EMBOSS)
-        self.output_image = self.img
+        emboss_img = self.img.filter(ImageFilter.EMBOSS)
+        self.output_image = emboss_img
 
     def resize_width(self, position):
         width, height = self.img.size
