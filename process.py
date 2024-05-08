@@ -57,6 +57,7 @@ class ImageProcessor:
         g = g.point(lambda i: i * (position / 255))
         out = Image.merge('RGB', (r, g, b))
         self.output_image = out
+
     def enhance_blue(self, position):
         position = float(position)
         r, g, b = self.img.split()
@@ -79,6 +80,7 @@ class ImageProcessor:
     def blur(self):
         blur_img = self.img.filter(ImageFilter.BLUR)
         self.output_image = blur_img
+
     def box_blur(self, position):
         position = float(position)
         blured = self.img.filter(ImageFilter.BoxBlur(position))
@@ -97,6 +99,7 @@ class ImageProcessor:
         width, height = self.img.size
         resized_image = self.img.resize((position, height), Image.LANCZOS)
         self.output_image = resized_image
+
     def resize_height(self, position):
         width, height = self.img.size
         resized_image = self.img.resize((width, position), Image.LANCZOS)
@@ -110,6 +113,7 @@ class ImageProcessor:
     def find_edge(self):
         find_edge_img = self.img.filter(ImageFilter.FIND_EDGES)
         self.output_image = find_edge_img
+
     def contour(self):
         contour_img = self.img.filter(ImageFilter.CONTOUR)
         self.output_image = contour_img

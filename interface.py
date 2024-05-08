@@ -11,6 +11,11 @@ from process import ImageProcessor
 
 class AppGUI:
     def __init__(self, master):
+        self.height_scale = None
+        self.width_scale = None
+        self.reset_btn = None
+        self.emboss_btn = None
+        self.rotate_btn = None
         self.panel = None
         self.p_image = None
         self.image = None
@@ -177,7 +182,7 @@ class AppGUI:
         self.edge_btn.place(x=1300, y=320)
 
         self.reset_btn = Button(self.master, text='Reset', width=25,
-                               command=self.reset, bg="#dddddd")
+                                command=self.reset, bg="#dddddd")
         self.reset_btn.configure(font=('consolas', 10, 'bold'), foreground='black')
         self.reset_btn.place(x=1300, y=355)
 
@@ -198,10 +203,10 @@ class AppGUI:
         self.save_btn.configure(font=('consolas', 10, 'bold'), foreground='black')
         self.save_btn.place(x=210, y=680)
 
-        self.about_btn = Button(self.master, text = 'About Us', width = 20,
-                                command = self.about_us, bg = "#dddddd")
-        self.about_btn.configure(font = ('consolas', 10, 'bold'), foreground = 'black')
-        self.about_btn.place(x = 1325, y = 680)
+        self.about_btn = Button(self.master, text='About Us', width=20,
+                                command=self.about_us, bg="#dddddd")
+        self.about_btn.configure(font=('consolas', 10, 'bold'), foreground='black')
+        self.about_btn.place(x=1325, y=680)
 
     def display_image(self, img):
         display_image = ImageTk.PhotoImage(img)
@@ -217,9 +222,11 @@ class AppGUI:
         filename = filedialog.askopenfilename(initialdir=os.getcwd(), title="Select Image",
                                               filetypes=(("JPEG files", "*.jpg"), ("All files", "*.*")))
         if filename:
+            self.reset()
             self.entry_box.insert(END, filename)
             self.image_processor.load_image(filename)
-            self.reset()
+            self.image = self.image_processor.img
+            self.default_image = self.image_processor.img
             self.display_image(self.default_image)
             self.image_stack.append(self.default_image)
 
@@ -469,9 +476,11 @@ class AppGUI:
     def edge(self):
         self.find_edge_window_status += 1
         self.init_find_edge_window()
+
     def edge_closing(self):
         self.find_edge_window_status = 0
         self.find_edge_window.destroy()
+
     def init_find_edge_window(self):
         if self.find_edge_window_status == 1:
             self.find_edge_window = Toplevel(self.master)
@@ -525,11 +534,11 @@ class AppGUI:
         self.blue_slider.set(255)
 
         def_width, def_height = self.default_image.size
-        if (self.resize_window_status == 1):
+        if self.resize_window_status == 1:
             self.width_scale.set(def_width)
             self.height_scale.set(def_height)
             self.resize_window_status = 0
-        if (self.crop_window_status == 1):
+        if self.crop_window_status == 1:
             self.top_left_x.set(0)
             self.top_left_y.set(0)
             self.bottom_right_x.set(def_width)
@@ -549,9 +558,11 @@ class AppGUI:
     def about_us(self):
         self.about_window_status += 1
         self.init_about_us_window()
+
     def about_closing(self):
         self.about_window_status = 0
         self.about_window.destroy()
+
     def init_about_us_window(self):
         if self.about_window_status == 1:
             self.about_window = Toplevel(self.master)
@@ -560,12 +571,12 @@ class AppGUI:
             self.about_window.protocol("WM_DELETE_WINDOW", self.about_closing)
             self.about_window.geometry("500x400")
 
-            title_label = Label(self.about_window, text = "About Us",
-                                font = ('consolas', 20, 'bold'))
-            title_label.pack(pady = 10)
+            title_label = Label(self.about_window, text="About Us",
+                                font=('consolas', 20, 'bold'))
+            title_label.pack(pady=10)
 
             about_text = (
-                "Chúng tôi là nhóm 13 lớp 02 XLTTDPT PTIT\n"
+                "Chúng mình là nhóm 13 lớp 02\n"
                 "Image Processor là sản phẩm của nhóm chúng tôi\n"
                 "nhằm phục vụ cho bài tập lớp bộ môn Xử lý & truyền thông \nĐa phương tiện\n"
                 "\n"
@@ -579,8 +590,6 @@ class AppGUI:
                 "\n"
                 "Sản phẩm không mang mục đích thương mại\n"
             )
-            about_label = Label(self.about_window, text = about_text,
-                                font = ('conoslas', 12), justify='left')
-            about_label.pack(padx = 20, pady = 10, anchor = 'w')
-
-
+            about_label = Label(self.about_window, text=about_text,
+                                font=('conoslas', 12), justify='left')
+            about_label.pack(padx=20, pady=10, anchor='w')
