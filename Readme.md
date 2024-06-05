@@ -1,4 +1,4 @@
-**Đây là bài tập lớn của môn Xử lý truyền thông Đa phương tiện - PTIT
+# Đây là bài tập lớn của bộ môn Xử lý truyền thông Đa phương tiện - PTIT
 
 Requirement: pillow, tkinter, opencv-python
 
